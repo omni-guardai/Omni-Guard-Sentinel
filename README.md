@@ -1,1 +1,1 @@
-# Omni-Guard-Sentinel
+# Omni-Guard Sentinel Agent
