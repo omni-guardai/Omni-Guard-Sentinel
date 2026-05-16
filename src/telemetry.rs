@@ -1,11 +1,11 @@
 use serde::{Deserialize, Serialize};
 use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::Duration;
+use tokio::time::sleep;
 
-// 💡 In sysinfo v0.30+, extension traits like CpuExt are completely removed.
-// We only import the native structs we need.
 use sysinfo::System;
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct SnapshotPayload {
     pub agent_id: String,
     pub user_id: String,
@@ -22,7 +22,6 @@ pub fn collect_telemetry() -> SnapshotPayload {
     let mut sys = System::new_all();
     sys.refresh_all();
 
-    // 💡 Read real metrics directly using standard v0.30 architecture methods
     let cpu_usage = if let Some(global_cpu) = sys.cpus().first() {
         global_cpu.cpu_usage() as f64
     } else {
@@ -49,5 +48,26 @@ pub fn collect_telemetry() -> SnapshotPayload {
             .duration_since(UNIX_EPOCH)
             .unwrap_or_default()
             .as_secs(),
+    }
+}
+
+/// 🛰️ The background network thread runner demanded by src/main.rs
+pub async fn start_heartbeat(agent_id: String, c2_endpoint: String) {
+    let client = reqwest::Client::builder()
+        .timeout(Duration::from_secs(5))
+        .build()
+        .unwrap_or_default();
+
+    loop {
+        let payload = collect_telemetry();
+        
+        // Broadcast local telemetry metrics up to the Omni-Guard Cloud Engine
+        let _ = client.post(&c2_endpoint)
+            .json(&payload)
+            .send()
+            .await;
+
+        // Sync check rhythm loop interval
+        sleep(Duration::from_secs(10)).await;
     }
 }
