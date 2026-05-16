@@ -25,12 +25,18 @@ jobs:
       - name: Run Build Sequence
         run: cargo build --release --bin sentinel_agent
 
-      - name: Upload Binaries to Release Hub
+      - name: Upload Windows Binary to Release Hub
+        if: matrix.platform == 'windows-latest'
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: |
-            target/release/sentinel_agent
-            target/release/sentinel_agent.exe
+          files: target/release/sentinel_agent.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Mac & Linux Binaries to Release Hub
+        if: matrix.platform != 'windows-latest'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: target/release/sentinel_agent
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
