@@ -25,9 +25,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     
     let hardware_id = uuid::Uuid::new_v4().to_string(); // Represent HWID
     println!("[i] Agent HWID: {}", hardware_id);
-
-    // 5. Stealth & Integrity Start
-    watchdog::engage_watchdog();
     
     let mut self_defense = self_protection::SelfDefenseCore::new();
     self_defense.engage_stealth_and_sovereignty();
@@ -37,24 +34,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let interceptor = interceptor::FilesystemInterceptor::new(Arc::clone(&sys));
     let mut rollback_mgr = rollback::RollbackManager::new();
 
-    // 3. The Firebase Heartbeat Thread
+    // 1. The Firebase Heartbeat Thread
     let agent_id_clone = hardware_id.clone();
     tokio::spawn(async move {
         telemetry::start_heartbeat(agent_id_clone, "omni-guard-ai".to_string()).await;
     });
     
-    // 3b. Watchdog File System loop
-    let agent_id_clone_2 = hardware_id.clone();
+    // 2. Real-Time Ransomware Watchdog File System loop
+    // 💡 Pointing precisely to a target sandbox protection directory instead of a text HWID string
     tokio::spawn(async move {
-        watchdog::start_filesystem_watchdog(agent_id_clone_2).await;
+        watchdog::start_filesystem_watchdog("./sandbox_protected_zone").await;
     });
 
-    // 4. Atomic Rollback Command Listener
+    // 3. Atomic Rollback Command Listener
     tokio::spawn(async move {
         rollback_mgr.listen_for_c2_commands().await;
     });
 
-    // 2. The I/O Interceptor Loop (Mocking a real OS driver filter)
+    // 4. The I/O Interceptor Loop (Mocking a real OS driver filter)
     println!("[✓] Agent Ready: Intercepting IRP_MJ_WRITE requests...");
     
     loop {
