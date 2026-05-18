@@ -42,6 +42,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tokio::spawn(async move {
         telemetry::start_heartbeat(agent_id_clone, "omni-guard-ai".to_string()).await;
     });
+    
+    // 3b. Watchdog File System loop
+    let agent_id_clone_2 = hardware_id.clone();
+    tokio::spawn(async move {
+        watchdog::start_filesystem_watchdog(agent_id_clone_2).await;
+    });
 
     // 4. Atomic Rollback Command Listener
     tokio::spawn(async move {
@@ -70,4 +76,3 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
     }
 }
-
