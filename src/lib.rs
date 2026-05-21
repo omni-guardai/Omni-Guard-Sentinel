@@ -1,3 +1,4 @@
+pub mod telemetry_uploader;
 pub mod telemetry;
 pub mod interceptor;
 pub mod entropy;
