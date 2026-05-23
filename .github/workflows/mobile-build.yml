@@ -33,9 +33,11 @@ jobs:
         mkdir -p android-app/app/src/main/jniLibs/arm64-v8a
         cp target/aarch64-linux-android/release/libsentinel_core.so android-app/app/src/main/jniLibs/arm64-v8a/
       
-    - name: Compile Android APK
-      working-directory: ./android-app
-      run: gradle assembleDebug
+    - name: Setup Gradle and Compile APK
+      uses: gradle/actions/setup-gradle@v3
+      with:
+        build-root-directory: ./android-app
+        arguments: assembleDebug
       
     - name: Upload Final APK Artifact
       uses: actions/upload-artifact@v4
