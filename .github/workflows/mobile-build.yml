@@ -36,6 +36,7 @@ jobs:
     - name: Setup Gradle and Compile APK
       uses: gradle/actions/setup-gradle@v3
       with:
+        gradle-version: '8.4'
         build-root-directory: ./android-app
         arguments: assembleDebug
       
