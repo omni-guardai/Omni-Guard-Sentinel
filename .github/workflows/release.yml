@@ -52,16 +52,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Sync Asset to Omni-Guard AI Core
+        shell: bash
+        env:
+          SYNC_SECRET: ${{ secrets.CORE_SYNC_SECRET }}
         run: |
           VERSION="${{ github.ref_name }}"
           URL="https://github.com/${{ github.repository }}/releases/download/${VERSION}/sentinel_agent${{ matrix.ext }}"
           
           curl -X POST https://omni-guard-ai.web.app/api/v1/enterprise/sentinel/sync-release \
             -H "Content-Type: application/json" \
-            -H "X-Sentinel-Sync-Token: ${{ secrets.CORE_SYNC_SECRET }}" \
-            -d "{
-              \"version\": \"${VERSION}\",
-              \"platform\": \"${{ matrix.os_name }}\",
-              \"fileExtension\": \"${{ matrix.ext }}\",
-              \"downloadUrl\": \"${URL}\"
-            }"
+            -H "X-Sentinel-Sync-Token: $SYNC_SECRET" \
+            -d "{\"version\": \"${VERSION}\", \"platform\": \"${{ matrix.os_name }}\", \"fileExtension\": \"${{ matrix.ext }}\", \"downloadUrl\": \"${URL}\"}"
